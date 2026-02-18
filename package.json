@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "bun --watch src",
-    "start": "bun src"
+    "start": "bun src",
+    "generate": "bunx --bun prisma generate",
+    "migrate": "bunx --bun prisma migrate dev"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -19,6 +21,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@prisma/adapter-mariadb": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
