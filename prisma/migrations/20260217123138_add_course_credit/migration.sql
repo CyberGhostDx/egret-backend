@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `course_offerings` ADD COLUMN `credits` DECIMAL(4, 1) NOT NULL DEFAULT 3.0;
