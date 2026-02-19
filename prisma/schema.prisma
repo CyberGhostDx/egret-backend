@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid()) @db.VarChar(30)
-  googleSub  String   @unique @map("google_sub") @db.VarChar(64)
-  email      String   @unique @db.VarChar(255)
-  name       String   @db.VarChar(255)
-  pictureUrl String?  @map("picture_url") @db.Text
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  id            String   @id @default(cuid()) @db.VarChar(255)
+  email         String   @unique @db.VarChar(255)
+  name          String   @db.VarChar(255)
+  emailVerified Boolean  @default(false) @map("email_verified")
+  image         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
-  userCourses  UserCourse[]
-  authSessions AuthSession[]
+  sessions    Session[]
+  accounts    Account[]
+  userCourses UserCourse[]
 
   @@map("users")
 }
@@ -35,7 +36,7 @@ model Course {
 
 model CourseOffering {
   id          String  @id @default(cuid()) @db.VarChar(30)
-  courseId    String  @map("course_id")
+  courseId    String  @map("course_id") @db.VarChar(30)
   section     String  @db.VarChar(32)
   instructor  String? @db.VarChar(255)
   sectionType String? @map("section_type") @db.VarChar(32)
@@ -50,8 +51,8 @@ model CourseOffering {
 }
 
 model UserCourse {
-  userId     String   @map("user_id")
-  offeringId String   @map("offering_id")
+  userId     String   @map("user_id") @db.VarChar(255)
+  offeringId String   @map("offering_id") @db.VarChar(30)
   createdAt  DateTime @default(now()) @map("created_at")
 
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -64,7 +65,7 @@ model UserCourse {
 
 model Exam {
   id         String   @id @default(cuid()) @db.VarChar(30)
-  offeringId String   @map("offering_id")
+  offeringId String   @map("offering_id") @db.VarChar(30)
   examType   String   @map("exam_type") @db.VarChar(16)
   examDate   DateTime @map("exam_date") @db.Date
   startTime  DateTime @map("start_time") @db.Time
@@ -81,31 +82,46 @@ model Exam {
   @@map("exams")
 }
 
-model AuthSession {
-  id        String    @id @default(cuid()) @db.VarChar(30)
-  userId    String    @map("user_id")
-  createdAt DateTime  @default(now()) @map("created_at")
-  revokedAt DateTime? @map("revoked_at")
+model Session {
+  id        String   @id @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique @db.VarChar(255)
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+  ipAddress String?  @map("ip_address") @db.VarChar(255)
+  userAgent String?  @map("user_agent") @db.Text
+  userId    String   @map("user_id") @db.VarChar(255)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
-
-  @@index([userId], map: "idx_sessions_user")
-  @@index([revokedAt], map: "idx_sessions_revoked")
-  @@map("auth_sessions")
+  @@map("session")
 }
 
-model RefreshToken {
-  id        String    @id @default(cuid()) @db.VarChar(30)
-  sessionId String    @map("session_id")
-  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
-  expiresAt DateTime  @map("expires_at")
-  revokedAt DateTime? @map("revoked_at")
+model Account {
+  id                    String    @id @db.VarChar(255)
+  accountId             String    @map("account_id") @db.VarChar(255)
+  providerId            String    @map("provider_id") @db.VarChar(255)
+  userId                String    @map("user_id") @db.VarChar(255)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token") @db.Text
+  refreshToken          String?   @map("refresh_token") @db.Text
+  idToken               String?   @map("id_token") @db.Text
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?   @db.Text
+  password              String?   @db.VarChar(255)
+  createdAt             DateTime  @map("created_at")
+  updatedAt             DateTime  @map("updated_at")
 
-  session AuthSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  @@map("account")
+}
 
-  @@index([sessionId], map: "idx_refresh_session")
-  @@index([expiresAt], map: "idx_refresh_expires")
-  @@index([revokedAt], map: "idx_refresh_revoked")
-  @@map("refresh_tokens")
+model Verification {
+  id         String    @id @db.VarChar(255)
+  identifier String    @db.VarChar(255)
+  value      String    @db.Text
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
+
+  @@map("verification")
 }

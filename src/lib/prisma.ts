@@ -1,5 +1,5 @@
-import { PrismaClient } from "../../prisma/generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaClient } from "../../prisma/generated/prisma/client"
+import { PrismaMariaDb } from "@prisma/adapter-mariadb"
 
 const adapter = new PrismaMariaDb({
   host: process.env.MYSQL_HOST,
@@ -8,16 +8,17 @@ const adapter = new PrismaMariaDb({
   password: process.env.MYSQL_PASSWORD,
   database: process.env.MYSQL_DATABASE,
   connectionLimit: 5,
-});
+  allowPublicKeyRetrieval: true,
+})
 
 const globalForPrisma = global as unknown as {
-  prisma: PrismaClient;
-};
+  prisma: PrismaClient
+}
 const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     adapter,
-  });
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+  })
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
 
-export default prisma;
+export default prisma

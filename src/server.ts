@@ -1,8 +1,15 @@
-import app from "./app";
-import config from "./config";
+import { env } from "./config/env"
+import app from "./app"
 
-const port = Number(config.port) || 8000;
+const startServer = () => {
+  try {
+    app.listen(env.PORT, () => {
+      console.log(`Server running at http://localhost:${env.PORT}`)
+    })
+  } catch (error) {
+    console.error("Failed to start server:", error)
+    process.exit(1)
+  }
+}
 
-app.listen(port, "127.0.0.1", () => {
-  console.log(`App running at http://localhost:${port}`);
-});
+startServer()

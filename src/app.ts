@@ -1,20 +1,21 @@
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth";
+import express from "express"
+import cors from "cors"
+import cookieParser from "cookie-parser"
+import { toNodeHandler } from "better-auth/node"
+import { auth } from "./lib/auth"
+import { corsOptions } from "./config/cors"
+import { routes } from "./routes"
+import { errorHandler } from "./http/middleware/errorHandler"
+import { csrfProtection } from "./middleware/csrf.middleware"
 
-const app = express();
+const app = express()
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-};
+app.use(cors(corsOptions))
+app.use(express.json())
+app.use(cookieParser())
+app.use(csrfProtection)
+app.all("/api/auth/*path", toNodeHandler(auth))
+app.use(routes)
+app.use(errorHandler)
 
-app.use(cors(corsOptions));
-app.all("/api/auth/*", toNodeHandler(auth));
-app.use(express.json());
-app.use(cookieParser());
-
-export default app;
+export default app

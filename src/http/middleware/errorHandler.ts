@@ -1,0 +1,56 @@
+import { type Request, type Response, type NextFunction } from "express"
+import { ZodError } from "zod"
+import { AppError, ErrorCode, ErrorStatusMap } from "../errors"
+import { CreateErrorResponse } from "../response"
+import { env } from "../../config/env"
+
+export const errorHandler = (
+  err: unknown,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  console.error(err)
+
+  if (err instanceof AppError) {
+    res
+      .status(err.statusCode)
+      .json(CreateErrorResponse(err.code, err.message, err.details))
+    return
+  }
+
+  if (err instanceof ZodError) {
+    res
+      .status(400)
+      .json(
+        CreateErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          "Validation Error",
+          err.flatten(),
+        ),
+      )
+    return
+  }
+
+  // Handle SyntaxError (e.g. invalid JSON)
+  if (err instanceof SyntaxError && "body" in err) {
+    res
+      .status(400)
+      .json(
+        CreateErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid JSON payload"),
+      )
+    return
+  }
+
+  // Default 500
+  const message =
+    env.NODE_ENV === "production"
+      ? "Internal Server Error"
+      : err instanceof Error
+        ? err.message
+        : "Unknown Error"
+
+  res
+    .status(500)
+    .json(CreateErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, message))
+}
