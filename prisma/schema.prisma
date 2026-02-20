@@ -25,7 +25,6 @@ model User {
 
 model Course {
   id      String  @id @db.VarChar(30)
-  code    String  @unique @db.VarChar(32)
   titleTh String  @map("title_th") @db.VarChar(255)
   titleEn String? @map("title_en") @db.VarChar(255)
 
@@ -35,12 +34,13 @@ model Course {
 }
 
 model CourseOffering {
-  id          String  @id @default(cuid()) @db.VarChar(30)
-  courseId    String  @map("course_id") @db.VarChar(30)
-  section     String  @db.VarChar(32)
-  instructor  String? @db.VarChar(255)
-  sectionType String? @map("section_type") @db.VarChar(32)
-  credits     Decimal @default(3.0) @db.Decimal(4, 1)
+  id           String  @id @default(cuid()) @db.VarChar(30)
+  courseId     String  @map("course_id") @db.VarChar(30)
+  section      String  @db.VarChar(32)
+  instructorTh String? @db.VarChar(255)
+  instructorEn String? @db.VarChar(255)
+  sectionType  String? @map("section_type") @db.VarChar(32)
+  credits      Decimal @default(3.0) @db.Decimal(4, 1)
 
   course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userCourses UserCourse[]
@@ -73,6 +73,7 @@ model Exam {
   building   String?  @db.VarChar(255)
   room       String?  @db.VarChar(255)
   note       String?  @db.Text
+  proctor    String?  @db.Text
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
   offering CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
