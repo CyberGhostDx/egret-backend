@@ -1,7 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express"
-import { AppError, ErrorCode } from "../http/errors"
-import { cookieConfig } from "../config/cookies"
-import { generateRandomToken } from "@/lib/crypto"
+import { AppError, ErrorCode } from "../lib/errors"
+import { cookieConfig } from "../../config/cookies"
+import { generateRandomToken } from "../lib/crypto"
 
 export const csrfProtection = (
   req: Request,

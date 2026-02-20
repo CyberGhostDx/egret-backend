@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express"
-import { AppError, ErrorCode } from "../http/errors"
+import { AppError, ErrorCode } from "../lib/errors"
 import { auth } from "../lib/auth"
 import { fromNodeHeaders } from "better-auth/node"
 
