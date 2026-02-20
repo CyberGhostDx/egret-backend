@@ -1,7 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express"
-import { ZodError } from "zod"
-import { AppError, ErrorCode, ErrorStatusMap } from "../errors"
-import { CreateErrorResponse } from "../response"
+import { z, ZodError } from "zod"
+import { AppError, ErrorCode } from "../lib/errors"
+import { CreateErrorResponse } from "../lib/response"
 import { env } from "../../config/env"
 
 export const errorHandler = (
@@ -26,7 +26,7 @@ export const errorHandler = (
         CreateErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           "Validation Error",
-          err.flatten(),
+          z.treeifyError(err),
         ),
       )
     return
