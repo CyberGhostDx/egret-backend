@@ -7,7 +7,8 @@
     "dev": "bun --watch src",
     "start": "bun src",
     "generate": "bunx --bun prisma generate",
-    "migrate": "bunx --bun prisma migrate dev"
+    "migrate": "bunx --bun prisma migrate dev",
+    "db:seed": "bunx --bun prisma db seed"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -27,6 +28,7 @@
     "better-auth": "^1.4.18",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "csv-parse": "^6.1.0",
     "express": "^5.2.1",
     "jose": "^6.1.3",
     "zod": "^4.3.6"
