@@ -8,8 +8,6 @@ export const enrollCourseSchema = z.object({
 export type EnrollCourseDto = z.infer<typeof enrollCourseSchema>
 
 export const userCourseSchema = z.object({
-  userId: z.string(),
-  offeringId: z.string(),
   offering: courseOfferingSchema,
 })
 
