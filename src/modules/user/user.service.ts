@@ -78,7 +78,18 @@ export class UserService {
     } catch (error) {
       const prismaError = error as { code?: string }
       if (prismaError.code === "P2002") {
-        return { success: false, message: "Course already enrolled" }
+        throw new AppError(
+          ErrorCode.COURSE_ALREADY_ENROLLED,
+          "Course already enrolled",
+          400,
+        )
+      }
+      if (prismaError.code === "P2003") {
+        throw new AppError(
+          ErrorCode.COURSE_NOT_FOUND,
+          "Invalid offering ID: course not found",
+          400,
+        )
       }
       throw error
     }
