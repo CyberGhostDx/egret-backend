@@ -1,7 +1,8 @@
-import type { Request, Response, NextFunction } from "express"
+import type { NextFunction, Request, Response } from "express"
 import { userService } from "./user.service"
 import { enrollCourseSchema } from "./user.schema"
 import { AppError, ErrorCode } from "@/shared/lib/errors"
+import { CreateSuccessResponse } from "@/shared/lib/response"
 
 export class UserController {
   async getMe(req: Request, res: Response, next: NextFunction) {
@@ -12,10 +13,7 @@ export class UserController {
       }
 
       const dashboard = await userService.getUserDashboard(userId)
-      res.json({
-        success: true,
-        data: dashboard,
-      })
+      res.json(CreateSuccessResponse(dashboard))
     } catch (error) {
       next(error)
     }
@@ -31,7 +29,7 @@ export class UserController {
       const { offeringId } = enrollCourseSchema.parse(req.body)
       const result = await userService.enrollCourse(userId, offeringId)
 
-      res.json(result)
+      res.json(CreateSuccessResponse(result))
     } catch (error) {
       next(error)
     }
@@ -47,7 +45,7 @@ export class UserController {
       const { offeringId } = enrollCourseSchema.parse(req.params)
       const result = await userService.unenrollCourse(userId, offeringId)
 
-      res.json(result)
+      res.json(CreateSuccessResponse(result))
     } catch (error) {
       next(error)
     }

@@ -7,6 +7,7 @@ export enum ErrorCode {
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
   NOT_FOUND = "NOT_FOUND",
   USER_NOT_FOUND = "USER_NOT_FOUND",
+  COURSE_NOT_FOUND = "COURSE_NOT_FOUND",
 }
 
 export class AppError extends Error {
@@ -37,4 +38,5 @@ export const ErrorStatusMap: Record<ErrorCode, number> = {
   [ErrorCode.INTERNAL_SERVER_ERROR]: 500,
   [ErrorCode.NOT_FOUND]: 404,
   [ErrorCode.USER_NOT_FOUND]: 404,
+  [ErrorCode.COURSE_NOT_FOUND]: 404,
 }
