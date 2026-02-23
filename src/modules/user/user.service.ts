@@ -38,11 +38,13 @@ export class UserService {
         name: true,
         email: true,
         userCourses: {
+          omit: { createdAt: true },
           include: {
             offering: {
               include: {
                 course: true,
                 exams: {
+                  omit: { offeringId: true },
                   orderBy: {
                     examDate: "asc",
                   },
