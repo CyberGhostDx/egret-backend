@@ -38,7 +38,7 @@ export class UserService {
         name: true,
         email: true,
         userCourses: {
-          omit: { createdAt: true },
+          omit: { createdAt: true, userId: true, offeringId: true },
           include: {
             offering: {
               include: {
@@ -63,10 +63,7 @@ export class UserService {
     return userWithCourses
   }
 
-  async enrollCourse(
-    userId: string,
-    offeringId: string,
-  ): Promise<{ success: boolean; message?: string }> {
+  async enrollCourse(userId: string, offeringId: string): Promise<any> {
     try {
       await prisma.userCourse.create({
         data: {
@@ -74,7 +71,19 @@ export class UserService {
           offeringId,
         },
       })
-      return { success: true }
+      const course = await prisma.courseOffering.findUnique({
+        where: { id: offeringId },
+        include: {
+          course: true,
+          exams: {
+            omit: { offeringId: true },
+            orderBy: {
+              examDate: "asc",
+            },
+          },
+        },
+      })
+      return course
     } catch (error) {
       const prismaError = error as { code?: string }
       if (prismaError.code === "P2002") {
@@ -95,10 +104,7 @@ export class UserService {
     }
   }
 
-  async unenrollCourse(
-    userId: string,
-    offeringId: string,
-  ): Promise<{ success: boolean }> {
+  async unenrollCourse(userId: string, offeringId: string): Promise<string> {
     try {
       await prisma.userCourse.delete({
         where: {
@@ -108,7 +114,7 @@ export class UserService {
           },
         },
       })
-      return { success: true }
+      return "unenrolled"
     } catch (error) {
       const prismaError = error as { code?: string }
       if (prismaError.code === "P2025") {
