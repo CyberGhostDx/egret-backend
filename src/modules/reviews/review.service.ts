@@ -5,7 +5,18 @@ import type { CreateReviewSchema, UpdateReviewSchema } from "./review.schema"
 export class ReviewService {
   async getReviewByCourseId(courseId: string) {
     const doc = await Review.findOne({ courseId })
-    return doc ? doc.reviews : []
+    if (!doc) return []
+
+    return doc.reviews
+      .filter((review) => review.status !== "deleted")
+      .map((review) => {
+        const reviewObj = review.toObject()
+        return {
+          ...reviewObj,
+          username: reviewObj.isAnonymous ? "Anonymous" : reviewObj.username,
+          vote: reviewObj.vote ? reviewObj.vote.length : 0,
+        }
+      })
   }
 
   async getAverageReviewByCourseId(courseId: string) {
