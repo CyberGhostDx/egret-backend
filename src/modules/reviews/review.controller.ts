@@ -38,7 +38,7 @@ export class ReviewController {
       }
       req.body.userId = req.auth.user.id
       req.body.username = req.auth.user.username
-      const { courseId } = courseIdParamsSchema.parse(req.body)
+      const { courseId } = courseIdParamsSchema.parse(req.params)
       const data = createReviewSchema.parse(req.body)
       const newReview = await reviewService.addReviewByCourseId(courseId, data)
       res.json(CreateSuccessResponse(newReview))
@@ -57,7 +57,7 @@ export class ReviewController {
         throw new AppError(ErrorCode.UNAUTH, "Unauthorized")
       }
       req.body.userId = req.auth.user.id
-      const { courseId } = courseIdParamsSchema.parse(req.body)
+      const { courseId } = courseIdParamsSchema.parse(req.params)
       const data = updateReviewSchema.parse(req.body)
       const updatedReview = await reviewService.updateReviewByCourseId(
         courseId,
@@ -79,7 +79,7 @@ export class ReviewController {
         throw new AppError(ErrorCode.UNAUTH, "Unauthorized")
       }
       const userId = req.auth.user.id
-      const { courseId } = courseIdParamsSchema.parse(req.body)
+      const { courseId } = courseIdParamsSchema.parse(req.params)
       const softDeletedReview = await reviewService.softDeleteReviewByCourseId(
         courseId,
         userId,
@@ -96,7 +96,7 @@ export class ReviewController {
         throw new AppError(ErrorCode.UNAUTH, "Unauthorized")
       }
       const userId = req.auth.user.id
-      const { reviewId } = voteReviewSchema.parse(req.body)
+      const { reviewId } = voteReviewSchema.parse(req.params)
       const updatedReview = await reviewService.addVoteByReviewId(
         reviewId,
         userId,
@@ -113,7 +113,7 @@ export class ReviewController {
         throw new AppError(ErrorCode.UNAUTH, "Unauthorized")
       }
       const userId = req.auth.user.id
-      const { reviewId } = voteReviewSchema.parse(req.body)
+      const { reviewId } = voteReviewSchema.parse(req.params)
       const updatedReview = await reviewService.removeVoteByReviewId(
         reviewId,
         userId,

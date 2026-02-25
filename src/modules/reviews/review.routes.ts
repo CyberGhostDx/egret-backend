@@ -4,10 +4,10 @@ import { reviewController } from "./review.controller"
 const router = Router()
 
 router.get("/:courseId", reviewController.getReviewByCourseId)
-router.post("/", reviewController.addReviewByCourseId)
-router.put("/", reviewController.updateReviewByCourseId)
-router.delete("/", reviewController.softDeleteReviewByCourseId)
-router.post("/vote", reviewController.addVoteByReviewId)
-router.delete("/vote", reviewController.removeVoteByReviewId)
+router.post("/:courseId", reviewController.addReviewByCourseId)
+router.put("/:courseId", reviewController.updateReviewByCourseId)
+router.delete("/:courseId", reviewController.softDeleteReviewByCourseId)
+router.post("/:reviewId/vote", reviewController.addVoteByReviewId)
+router.delete("/:reviewId/vote", reviewController.removeVoteByReviewId)
 
 export default router
