@@ -9,6 +9,7 @@ export enum ErrorCode {
   USER_NOT_FOUND = "USER_NOT_FOUND",
   COURSE_NOT_FOUND = "COURSE_NOT_FOUND",
   COURSE_ALREADY_ENROLLED = "COURSE_ALREADY_ENROLLED",
+  REVIEW_NOT_FOUND = "REVIEW_NOT_FOUND",
 }
 
 export class AppError extends Error {
@@ -41,4 +42,5 @@ export const ErrorStatusMap: Record<ErrorCode, number> = {
   [ErrorCode.USER_NOT_FOUND]: 404,
   [ErrorCode.COURSE_NOT_FOUND]: 404,
   [ErrorCode.COURSE_ALREADY_ENROLLED]: 400,
+  [ErrorCode.REVIEW_NOT_FOUND]: 404,
 }
