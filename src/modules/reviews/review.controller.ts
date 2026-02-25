@@ -37,7 +37,7 @@ export class ReviewController {
         throw new AppError(ErrorCode.UNAUTH, "Unauthorized")
       }
       req.body.userId = req.auth.user.id
-      req.body.username = req.auth.user.username
+      req.body.username = req.auth.user.name
       const { courseId } = courseIdParamsSchema.parse(req.params)
       const data = createReviewSchema.parse(req.body)
       const newReview = await reviewService.addReviewByCourseId(courseId, data)

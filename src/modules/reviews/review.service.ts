@@ -67,7 +67,7 @@ export class ReviewService {
           },
         },
       },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: "after" },
     )
 
     if (!updatedDoc) {
@@ -86,7 +86,7 @@ export class ReviewService {
           "reviews.$.difficulty": data.difficulty,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     )
 
     if (!updatedDoc) {
@@ -104,7 +104,7 @@ export class ReviewService {
           "reviews.$.status": "deleted",
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     )
 
     if (!updatedDoc) {
@@ -124,7 +124,7 @@ export class ReviewService {
           },
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     )
 
     if (!updatedDoc) {
@@ -144,7 +144,7 @@ export class ReviewService {
           },
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     )
 
     if (!updatedDoc) {
