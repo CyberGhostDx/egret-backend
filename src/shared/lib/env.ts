@@ -6,6 +6,7 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().default(8000),
   MYSQL_DATABASE_URL: z.url(),
+  MONGODB_URL: z.url(),
 
   FRONTEND_URL: z.url(),
 
