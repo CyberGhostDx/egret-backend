@@ -1,7 +1,7 @@
 import { Router } from "express"
-import userRoutes from "./modules/user/user.routes"
+import userRoutes from "./modules/users/user.routes"
 import { requireAuth } from "./shared/middleware/auth.middleware"
-import courseRoutes from "./modules/exam/course.routes"
+import courseRoutes from "./modules/courses/course.routes"
 
 const router = Router()
 
