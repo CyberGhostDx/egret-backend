@@ -11,7 +11,7 @@ export class ReviewService {
       .filter((review) => review.status !== "deleted")
       .map((review) => {
         const reviewObj = review.toObject()
-        const { status, isAnonymous, ...cleanReview } = reviewObj
+        const { status, isAnonymous, userId, ...cleanReview } = reviewObj
         return {
           ...cleanReview,
           username: isAnonymous ? "Anonymous" : cleanReview.username,
