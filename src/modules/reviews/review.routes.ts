@@ -5,8 +5,8 @@ const router = Router()
 
 router.get("/:courseId", reviewController.getReviewByCourseId)
 router.post("/:courseId", reviewController.addReviewByCourseId)
-router.put("/:courseId", reviewController.updateReviewByCourseId)
-router.delete("/:courseId", reviewController.softDeleteReviewByCourseId)
+// router.put("/:courseId", reviewController.updateReviewByCourseId)
+// router.delete("/:courseId", reviewController.softDeleteReviewByCourseId)
 // router.post("/:reviewId/vote", reviewController.addVoteByReviewId)
 // router.delete("/:reviewId/vote", reviewController.removeVoteByReviewId)
 
