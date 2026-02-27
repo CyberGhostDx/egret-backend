@@ -13,6 +13,7 @@ model User {
   name          String   @db.VarChar(255)
   emailVerified Boolean  @default(false) @map("email_verified")
   image         String?  @db.Text
+  role          String?  @db.VarChar(255)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
