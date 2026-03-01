@@ -1,8 +1,8 @@
-import { type Request, type Response, type NextFunction } from "express"
-import { z, ZodError } from "zod"
-import { AppError, ErrorCode } from "../lib/errors"
-import { CreateErrorResponse } from "../lib/response"
-import { env } from "../../config/env"
+import { type Request, type Response, type NextFunction } from "express";
+import { z, ZodError } from "zod";
+import { AppError, ErrorCode } from "../lib/errors";
+import { CreateErrorResponse } from "../lib/response";
+import { env } from "../../config/env";
 
 export const errorHandler = (
   err: unknown,
@@ -10,13 +10,11 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
-  console.error(err)
-
   if (err instanceof AppError) {
     res
       .status(err.statusCode)
-      .json(CreateErrorResponse(err.code, err.message, err.details))
-    return
+      .json(CreateErrorResponse(err.code, err.message, err.details));
+    return;
   }
 
   if (err instanceof ZodError) {
@@ -28,8 +26,8 @@ export const errorHandler = (
           "Validation Error",
           z.treeifyError(err),
         ),
-      )
-    return
+      );
+    return;
   }
 
   // Handle SyntaxError (e.g. invalid JSON)
@@ -38,8 +36,8 @@ export const errorHandler = (
       .status(400)
       .json(
         CreateErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid JSON payload"),
-      )
-    return
+      );
+    return;
   }
 
   // Default 500
@@ -48,9 +46,9 @@ export const errorHandler = (
       ? "Internal Server Error"
       : err instanceof Error
         ? err.message
-        : "Unknown Error"
+        : "Unknown Error";
 
   res
     .status(500)
-    .json(CreateErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, message))
-}
+    .json(CreateErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, message));
+};
