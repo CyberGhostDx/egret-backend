@@ -12,25 +12,6 @@ export enum ErrorCode {
   REVIEW_NOT_FOUND = "REVIEW_NOT_FOUND",
 }
 
-export class AppError extends Error {
-  public readonly code: ErrorCode
-  public readonly statusCode: number
-  public readonly details?: unknown
-
-  constructor(
-    code: ErrorCode,
-    message: string,
-    statusCode = 500,
-    details?: unknown,
-  ) {
-    super(message)
-    this.code = code
-    this.statusCode = statusCode
-    this.details = details
-    Object.setPrototypeOf(this, AppError.prototype)
-  }
-}
-
 export const ErrorStatusMap: Record<ErrorCode, number> = {
   [ErrorCode.UNAUTH]: 401,
   [ErrorCode.FORBIDDEN]: 403,
@@ -43,4 +24,23 @@ export const ErrorStatusMap: Record<ErrorCode, number> = {
   [ErrorCode.COURSE_NOT_FOUND]: 404,
   [ErrorCode.COURSE_ALREADY_ENROLLED]: 400,
   [ErrorCode.REVIEW_NOT_FOUND]: 404,
+};
+
+export class AppError extends Error {
+  public readonly code: ErrorCode;
+  public readonly statusCode: number;
+  public readonly details?: unknown;
+
+  constructor(
+    code: ErrorCode,
+    message: string,
+    statusCode?: number,
+    details?: unknown,
+  ) {
+    super(message);
+    this.code = code;
+    this.statusCode = statusCode ?? ErrorStatusMap[code] ?? 500;
+    this.details = details;
+    Object.setPrototypeOf(this, AppError.prototype);
+  }
 }
