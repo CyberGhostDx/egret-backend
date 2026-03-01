@@ -1,34 +1,34 @@
-import prisma from "@/shared/lib/prisma"
-import { type User } from "../../../prisma/generated/prisma/client"
-import { AppError, ErrorCode } from "@/shared/lib/errors"
+import prisma from "@/shared/lib/prisma";
+import { type User } from "../../../prisma/generated/prisma/client";
+import { AppError, ErrorCode } from "@/shared/lib/errors";
 
 export class UserService {
   async getUserById(id: string): Promise<User> {
     const user = await prisma.user.findUnique({
       where: { id },
-    })
+    });
 
     if (!user) {
-      throw new AppError(ErrorCode.USER_NOT_FOUND, "User not found", 404)
+      throw new AppError(ErrorCode.USER_NOT_FOUND, "User not found", 404);
     }
 
-    return user
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User> {
     const user = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (!user) {
       throw new AppError(
         ErrorCode.USER_NOT_FOUND,
         "User with this email not found",
         404,
-      )
+      );
     }
 
-    return user
+    return user;
   }
 
   async getUserDashboard(userId: string): Promise<any> {
@@ -54,13 +54,13 @@ export class UserService {
           },
         },
       },
-    })
+    });
 
     if (!userWithCourses) {
-      throw new AppError(ErrorCode.USER_NOT_FOUND, "User not found", 404)
+      throw new AppError(ErrorCode.USER_NOT_FOUND, "User not found", 404);
     }
 
-    return userWithCourses
+    return userWithCourses;
   }
 
   async enrollCourse(userId: string, offeringId: string): Promise<any> {
@@ -70,37 +70,25 @@ export class UserService {
           userId,
           offeringId,
         },
-      })
-      const course = await prisma.courseOffering.findUnique({
-        where: { id: offeringId },
-        include: {
-          course: true,
-          exams: {
-            omit: { offeringId: true },
-            orderBy: {
-              examDate: "asc",
-            },
-          },
-        },
-      })
-      return course
+      });
+      return "enrolled";
     } catch (error) {
-      const prismaError = error as { code?: string }
+      const prismaError = error as { code?: string };
       if (prismaError.code === "P2002") {
         throw new AppError(
           ErrorCode.COURSE_ALREADY_ENROLLED,
           "Course already enrolled",
           400,
-        )
+        );
       }
       if (prismaError.code === "P2003") {
         throw new AppError(
           ErrorCode.COURSE_NOT_FOUND,
           "Invalid offering ID: course not found",
           400,
-        )
+        );
       }
-      throw error
+      throw error;
     }
   }
 
@@ -113,20 +101,20 @@ export class UserService {
             offeringId,
           },
         },
-      })
-      return "unenrolled"
+      });
+      return "unenrolled";
     } catch (error) {
-      const prismaError = error as { code?: string }
+      const prismaError = error as { code?: string };
       if (prismaError.code === "P2025") {
         throw new AppError(
           ErrorCode.NOT_FOUND,
           "Enrollment record not found",
           404,
-        )
+        );
       }
-      throw error
+      throw error;
     }
   }
 }
 
-export const userService = new UserService()
+export const userService = new UserService();
