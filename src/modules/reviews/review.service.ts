@@ -55,7 +55,7 @@ export class ReviewService {
 
     return averages.reduce(
       (acc, curr) => {
-        acc[curr._id] = curr.averageDifficulty;
+        acc[curr._id] = Math.round(curr.averageDifficulty);
         return acc;
       },
       {} as Record<string, number>,
