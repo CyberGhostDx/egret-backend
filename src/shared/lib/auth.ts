@@ -9,6 +9,9 @@ export const auth = betterAuth({
     provider: "mysql",
   }),
   trustedOrigins: [env.FRONTEND_URL],
+  rateLimit: {
+    enabled: true,
+  },
   advanced: {
     cookiePrefix: "egret",
   },
@@ -50,7 +53,7 @@ export const auth = betterAuth({
           name: user.name,
           email: user.email,
           image: user.image,
-          role: (user as any).role,
+          role: (user as typeof user & { role: string }).role,
         },
         session: {
           id: session.id,

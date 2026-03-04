@@ -114,6 +114,15 @@ export class ReviewService {
   }
 
   async addVoteByReviewId(reviewId: string, userId: string) {
+    const existingVote = await Review.findOne({
+      _id: reviewId,
+      "vote.userId": userId,
+    });
+
+    if (existingVote) {
+      return existingVote;
+    }
+
     const review = await Review.findOneAndUpdate(
       { _id: reviewId, status: { $ne: "deleted" } },
       {
