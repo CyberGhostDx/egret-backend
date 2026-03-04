@@ -1,39 +1,40 @@
-import { Schema, model, type InferSchemaType, Types } from "mongoose"
+import { Schema, model, type InferSchemaType } from "mongoose";
 
 const reviewSchema = new Schema(
   {
     courseId: {
       type: String,
       required: true,
-      unique: true,
+      index: true,
     },
-    reviews: [
+    userId: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    difficulty: {
+      type: Number,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
+    status: {
+      type: String,
+      enum: ["published", "deleted"],
+      default: "published",
+    },
+    vote: [
       {
-        _id: {
-          type: String,
-          default: () => new Types.ObjectId().toString(),
-        },
         userId: {
-          type: String,
-          required: true,
-        },
-        username: {
-          type: String,
-          required: true,
-        },
-        difficulty: {
-          type: Number,
-          required: true,
-        },
-        content: {
-          type: String,
-          required: true,
-        },
-        isAnonymous: {
-          type: Boolean,
-          required: true,
-        },
-        status: {
           type: String,
           required: true,
         },
@@ -41,25 +42,15 @@ const reviewSchema = new Schema(
           type: Date,
           default: Date.now,
         },
-        vote: [
-          {
-            userId: {
-              type: String,
-              required: true,
-            },
-            createdAt: {
-              type: Date,
-              default: Date.now,
-            },
-          },
-        ],
       },
     ],
   },
   {
     timestamps: true,
   },
-)
+);
 
-export type ReviewType = InferSchemaType<typeof reviewSchema>
-export const Review = model("Review", reviewSchema)
+reviewSchema.index({ courseId: 1, createdAt: -1 });
+
+export type ReviewType = InferSchemaType<typeof reviewSchema>;
+export const Review = model("Review", reviewSchema);

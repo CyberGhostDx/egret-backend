@@ -1,0 +1,8 @@
+node_modules
+.git
+.agent
+.DS_Store
+.env
+.env.example
+README.md
+npm-debug.log
