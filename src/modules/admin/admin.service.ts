@@ -26,14 +26,14 @@ export const getDashboardStats = async (): Promise<AdminDashboardResponse> => {
   });
 
   const topCourses = courses
-    .map((course: any) => ({
+    .map((course) => ({
       courseName: course.titleTh || course.titleEn || "Unknown Course",
       studentCount: course.offerings.reduce(
-        (acc: number, off: any) => acc + off._count.userCourses,
+        (acc, off) => acc + off._count.userCourses,
         0,
       ),
     }))
-    .sort((a: any, b: any) => b.studentCount - a.studentCount)
+    .sort((a, b) => b.studentCount - a.studentCount)
     .slice(0, 5);
 
   return {

@@ -3,12 +3,25 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { customSession } from "better-auth/plugins";
 import prisma from "./prisma";
 import { env } from "../../config/env";
+import { logger } from "./logger";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "mysql",
   }),
+  databaseHooks: {
+    session: {
+      create: {
+        after: async ({ data }) => {
+          logger.info({ userId: (data as any).userId }, "New session created");
+        },
+      },
+    },
+  },
   trustedOrigins: [env.FRONTEND_URL],
+  rateLimit: {
+    enabled: true,
+  },
   advanced: {
     cookiePrefix: "egret",
   },
@@ -50,7 +63,7 @@ export const auth = betterAuth({
           name: user.name,
           email: user.email,
           image: user.image,
-          role: (user as any).role,
+          role: (user as typeof user & { role: string }).role,
         },
         session: {
           id: session.id,

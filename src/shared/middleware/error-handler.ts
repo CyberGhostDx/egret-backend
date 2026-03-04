@@ -3,6 +3,7 @@ import { z, ZodError } from "zod";
 import { AppError, ErrorCode } from "../lib/errors";
 import { CreateErrorResponse } from "../lib/response";
 import { env } from "../../config/env";
+import { logger } from "../lib/logger";
 
 export const errorHandler = (
   err: unknown,
@@ -10,6 +11,8 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
+  logger.error(err);
+
   if (err instanceof AppError) {
     res
       .status(err.statusCode)
