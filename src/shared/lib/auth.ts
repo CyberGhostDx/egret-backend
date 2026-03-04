@@ -13,7 +13,7 @@ export const auth = betterAuth({
     session: {
       create: {
         after: async ({ data }) => {
-          logger.info({ userId: (data as any).userId }, "New session created");
+          logger.info({ userId: (data as any)?.userId }, "New session created");
         },
       },
     },
