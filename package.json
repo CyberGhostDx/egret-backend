@@ -16,7 +16,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "prettier": "^3.8.1",
-    "prisma": "^7.4.0"
+    "prisma": "^7.4.1"
   },
   "peerDependencies": {
     "typescript": "^5"
