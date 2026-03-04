@@ -7,9 +7,11 @@ import { corsOptions } from "./config/cors"
 import { routes } from "./routes"
 import { errorHandler } from "./shared/middleware/error-handler"
 import { csrfProtection } from "./shared/middleware/csrf.middleware"
+import { requestLogger } from "./shared/middleware/logger.middleware"
 
 const app = express()
 
+app.use(requestLogger)
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
