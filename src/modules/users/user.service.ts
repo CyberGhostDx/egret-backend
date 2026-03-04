@@ -1,6 +1,7 @@
 import prisma from "@/shared/lib/prisma";
 import { type User } from "../../../prisma/generated/prisma/client";
 import { AppError, ErrorCode } from "@/shared/lib/errors";
+import { type UserDashboardResponse } from "./user.schema";
 
 export class UserService {
   async getUserById(id: string): Promise<User> {
@@ -31,7 +32,7 @@ export class UserService {
     return user;
   }
 
-  async getUserDashboard(userId: string): Promise<any> {
+  async getUserDashboard(userId: string): Promise<UserDashboardResponse> {
     const userWithCourses = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -60,10 +61,10 @@ export class UserService {
       throw new AppError(ErrorCode.USER_NOT_FOUND, "User not found", 404);
     }
 
-    return userWithCourses;
+    return userWithCourses as unknown as UserDashboardResponse;
   }
 
-  async enrollCourse(userId: string, offeringId: string): Promise<any> {
+  async enrollCourse(userId: string, offeringId: string): Promise<string> {
     try {
       await prisma.userCourse.create({
         data: {
