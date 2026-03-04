@@ -25,6 +25,24 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  backend:
+    build: .
+    container_name: egret_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - MYSQL_DATABASE_URL=mysql://${MYSQL_USER:-user}:${MYSQL_PASSWORD:-password}@mysql:3306/${MYSQL_DATABASE:-egret_db}
+      - MONGODB_URL=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-adminpassword}@mongodb:27017/egret_db?authSource=admin
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - mongodb
+
 volumes:
   mysql_data:
   mongodb_data:
