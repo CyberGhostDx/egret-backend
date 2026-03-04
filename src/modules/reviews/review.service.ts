@@ -1,159 +1,157 @@
-import { Review } from "./review.model"
-import { AppError, ErrorCode } from "@/shared/lib/errors"
-import type { CreateReviewSchema, UpdateReviewSchema } from "./review.schema"
+import { Review } from "./review.model";
+import { AppError, ErrorCode } from "@/shared/lib/errors";
+import type { CreateReviewSchema, UpdateReviewSchema } from "./review.schema";
 
 export class ReviewService {
   async getReviewByCourseId(courseId: string) {
-    const doc = await Review.findOne({ courseId })
-    if (!doc) return []
+    const reviews = await Review.find({ courseId, status: { $ne: "deleted" } })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return doc.reviews
-      .filter((review) => review.status !== "deleted")
-      .map((review) => {
-        const reviewObj = review.toObject()
-        const { status, isAnonymous, userId, ...cleanReview } = reviewObj
-        return {
-          ...cleanReview,
-          username: isAnonymous ? "Anonymous" : cleanReview.username,
-          vote: cleanReview.vote ? cleanReview.vote.length : 0,
-        }
-      })
+    if (!reviews || reviews.length === 0) return [];
+
+    return reviews.map((review) => {
+      const {
+        status,
+        isAnonymous,
+        userId,
+        courseId: _,
+        __v,
+        updatedAt,
+        ...cleanReview
+      } = review;
+      return {
+        ...cleanReview,
+        username: isAnonymous ? "Anonymous" : cleanReview.username,
+        vote: cleanReview.vote ? cleanReview.vote.length : 0,
+      };
+    });
   }
 
   async getAverageReviewByCourseId(courseId: string) {
-    const doc = await Review.findOne({ courseId })
-    if (!doc || doc.reviews.length === 0) return 0
+    const result = await Review.aggregate([
+      { $match: { courseId, status: { $ne: "deleted" } } },
+      {
+        $group: {
+          _id: null,
+          averageDifficulty: { $avg: "$difficulty" },
+        },
+      },
+    ]);
 
-    const activeReviews = doc.reviews.filter((r) => r.status !== "deleted")
-    if (activeReviews.length === 0) return 0
-
-    const sum = activeReviews.reduce(
-      (acc, review) => acc + review.difficulty,
-      0,
-    )
-    return sum / activeReviews.length
+    return result.length > 0 ? Math.round(result[0].averageDifficulty) : 0;
   }
 
   async getAverageReviewsByCourseIds(courseIds: string[]) {
     const averages = await Review.aggregate([
-      { $match: { courseId: { $in: courseIds } } },
-      { $unwind: "$reviews" },
-      { $match: { "reviews.status": { $ne: "deleted" } } },
+      { $match: { courseId: { $in: courseIds }, status: { $ne: "deleted" } } },
       {
         $group: {
           _id: "$courseId",
-          averageDifficulty: { $avg: "$reviews.difficulty" },
+          averageDifficulty: { $avg: "$difficulty" },
         },
       },
-    ])
+    ]);
 
     return averages.reduce(
       (acc, curr) => {
-        acc[curr._id] = curr.averageDifficulty
-        return acc
+        acc[curr._id] = Math.round(curr.averageDifficulty);
+        return acc;
       },
       {} as Record<string, number>,
-    )
+    );
   }
 
   async addReviewByCourseId(courseId: string, data: CreateReviewSchema) {
-    const updatedDoc = await Review.findOneAndUpdate(
-      { courseId },
-      {
-        $push: {
-          reviews: {
-            ...data,
-            status: "active",
-            vote: [],
-          },
-        },
-      },
-      { upsert: true, returnDocument: "after" },
-    )
+    const review = await Review.create({
+      ...data,
+      courseId,
+      status: "published",
+    });
 
-    if (!updatedDoc) {
-      throw new AppError(ErrorCode.COURSE_NOT_FOUND, "Could not add review")
+    if (!review) {
+      throw new AppError(ErrorCode.COURSE_NOT_FOUND, "Could not add review");
     }
 
-    return updatedDoc.reviews[updatedDoc.reviews.length - 1]
+    return review;
   }
 
-  async updateReviewByCourseId(courseId: string, data: UpdateReviewSchema) {
-    const updatedDoc = await Review.findOneAndUpdate(
-      { courseId, "reviews.userId": data.userId },
+  async updateReviewByReviewId(data: UpdateReviewSchema) {
+    const review = await Review.findOneAndUpdate(
+      { _id: data.reviewId, userId: data.userId, status: { $ne: "deleted" } },
       {
         $set: {
-          "reviews.$.content": data.content,
-          "reviews.$.difficulty": data.difficulty,
+          content: data.content,
+          difficulty: data.difficulty,
         },
       },
       { returnDocument: "after" },
-    )
+    );
 
-    if (!updatedDoc) {
-      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found")
+    if (!review) {
+      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found");
     }
 
-    return updatedDoc.reviews.find((r) => r.userId === data.userId)
+    return review;
   }
 
-  async softDeleteReviewByCourseId(courseId: string, userId: string) {
-    const updatedDoc = await Review.findOneAndUpdate(
-      { courseId, "reviews.userId": userId },
+  async softDeleteReviewByReviewId(reviewId: string, userId: string) {
+    const review = await Review.findOneAndUpdate(
+      { _id: reviewId, userId, status: { $ne: "deleted" } },
       {
         $set: {
-          "reviews.$.status": "deleted",
+          status: "deleted",
         },
       },
       { returnDocument: "after" },
-    )
+    );
 
-    if (!updatedDoc) {
-      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found")
+    if (!review) {
+      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found");
     }
 
-    return updatedDoc.reviews.find((r) => r.userId === userId)
+    return review;
   }
 
   async addVoteByReviewId(reviewId: string, userId: string) {
-    const updatedDoc = await Review.findOneAndUpdate(
-      { "reviews._id": reviewId },
+    const review = await Review.findOneAndUpdate(
+      { _id: reviewId, status: { $ne: "deleted" } },
       {
         $push: {
-          "reviews.$.vote": {
+          vote: {
             userId,
           },
         },
       },
       { returnDocument: "after" },
-    )
+    );
 
-    if (!updatedDoc) {
-      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found")
+    if (!review) {
+      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found");
     }
 
-    return updatedDoc.reviews.id(reviewId)
+    return review;
   }
 
   async removeVoteByReviewId(reviewId: string, userId: string) {
-    const updatedDoc = await Review.findOneAndUpdate(
-      { "reviews._id": reviewId },
+    const review = await Review.findOneAndUpdate(
+      { _id: reviewId, status: { $ne: "deleted" } },
       {
         $pull: {
-          "reviews.$.vote": {
+          vote: {
             userId,
           },
         },
       },
       { returnDocument: "after" },
-    )
+    );
 
-    if (!updatedDoc) {
-      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found")
+    if (!review) {
+      throw new AppError(ErrorCode.REVIEW_NOT_FOUND, "Review not found");
     }
 
-    return updatedDoc.reviews.id(reviewId)
+    return review;
   }
 }
 
-export const reviewService = new ReviewService()
+export const reviewService = new ReviewService();

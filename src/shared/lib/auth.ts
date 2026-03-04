@@ -1,8 +1,8 @@
-import { betterAuth, APIError } from "better-auth"
-import { prismaAdapter } from "better-auth/adapters/prisma"
-import { customSession } from "better-auth/plugins"
-import prisma from "./prisma"
-import { env } from "../../config/env"
+import { betterAuth, APIError } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { customSession } from "better-auth/plugins";
+import prisma from "./prisma";
+import { env } from "../../config/env";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -26,14 +26,14 @@ export const auth = betterAuth({
   hooks: {
     before: async (ctx) => {
       if (ctx.request) {
-        const url = new URL(ctx.request.url)
+        const url = new URL(ctx.request.url);
         if (url.pathname.endsWith("/sign-up/email")) {
-          throw new APIError("BAD_REQUEST", {
-            message: "Registration via email is disabled.",
-          })
+          throw new APIError("FORBIDDEN", {
+            message: "Forbidden",
+          });
         }
       }
-      return { context: ctx }
+      return { context: ctx };
     },
   },
   socialProviders: {
@@ -56,7 +56,7 @@ export const auth = betterAuth({
           id: session.id,
           expiresAt: session.expiresAt,
         },
-      }
+      };
     }),
   ],
-})
+});
