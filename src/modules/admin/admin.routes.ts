@@ -12,4 +12,7 @@ router.patch(
   adminController.restoreReviewByReviewId,
 );
 router.post("/exam", adminController.createExams);
+router.patch("/exams", adminController.updateExam);
+router.delete("/exams/:examId", adminController.deleteExam);
+router.delete("/offerings/:offeringId", adminController.deleteOffering);
 export default router;

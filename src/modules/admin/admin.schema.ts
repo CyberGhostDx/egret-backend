@@ -60,10 +60,26 @@ export const createExamItemSchema = z
 
 export const createExamsSchema = z.array(createExamItemSchema);
 
+export const updateCourseOfferingExamSchema = createExamItemSchema.extend({
+  id: z.string().min(1, "Course Offering ID is required"),
+  examId: z.string().min(1, "Exam ID is required"),
+});
+
+export const examIdParamSchema = z.object({
+  examId: z.string().min(1, "Exam ID is required"),
+});
+
+export const offeringIdParamSchema = z.object({
+  offeringId: z.string().min(1, "Offering ID is required"),
+});
+
 export const reviewIdParamSchema = z.object({
   reviewId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Review ID format"),
 });
 
 export type AdminDashboardResponse = z.infer<typeof adminDashboardSchema>;
 export type CreateExamsInput = z.infer<typeof createExamsSchema>;
+export type UpdateCourseOfferingExamInput = z.infer<
+  typeof updateCourseOfferingExamSchema
+>;
 export type ReviewIdParam = z.infer<typeof reviewIdParamSchema>;

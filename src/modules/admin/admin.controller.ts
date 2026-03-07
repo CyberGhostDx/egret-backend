@@ -3,7 +3,10 @@ import { adminService } from "./admin.service";
 import {
   adminDashboardSchema,
   createExamsSchema,
+  examIdParamSchema,
+  offeringIdParamSchema,
   reviewIdParamSchema,
+  updateCourseOfferingExamSchema,
 } from "./admin.schema";
 import { CreateSuccessResponse } from "@/shared/lib/response";
 
@@ -99,6 +102,56 @@ export class AdminController {
 
       res.json(
         CreateSuccessResponse({ message: "Review restored successfully" }),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateExam(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const validatedData = updateCourseOfferingExamSchema.parse(req.body);
+
+      const result = await adminService.updateExam(validatedData);
+
+      res.json(CreateSuccessResponse(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteExam(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { examId } = examIdParamSchema.parse(req.params);
+
+      await adminService.deleteExamById(examId);
+
+      res.json(CreateSuccessResponse({ message: "Exam deleted successfully" }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteOffering(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { offeringId } = offeringIdParamSchema.parse(req.params);
+
+      await adminService.deleteOfferingById(offeringId);
+
+      res.json(
+        CreateSuccessResponse({ message: "Offering deleted successfully" }),
       );
     } catch (error) {
       next(error);
