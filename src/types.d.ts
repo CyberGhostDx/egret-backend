@@ -1,9 +1,9 @@
-import { auth } from "./lib/auth"
+import { auth } from "./shared/lib/auth";
 
 declare global {
   namespace Express {
     interface Request {
-      auth?: typeof auth.$Infer.Session
+      auth?: typeof auth.$Infer.Session;
     }
   }
 }
