@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  examIdParamSchema,
+  offeringIdParamSchema,
+  reviewIdParamSchema,
+} from "@/shared/schemas/schema";
 
 export const adminDashboardSchema = z.object({
   totalCourseOfferings: z.number(),
@@ -65,17 +70,7 @@ export const updateCourseOfferingExamSchema = createExamItemSchema.extend({
   examId: z.string().min(1, "Exam ID is required"),
 });
 
-export const examIdParamSchema = z.object({
-  examId: z.string().min(1, "Exam ID is required"),
-});
-
-export const offeringIdParamSchema = z.object({
-  offeringId: z.string().min(1, "Offering ID is required"),
-});
-
-export const reviewIdParamSchema = z.object({
-  reviewId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Review ID format"),
-});
+export { examIdParamSchema, offeringIdParamSchema, reviewIdParamSchema };
 
 export type AdminDashboardResponse = z.infer<typeof adminDashboardSchema>;
 export type CreateExamsInput = z.infer<typeof createExamsSchema>;
