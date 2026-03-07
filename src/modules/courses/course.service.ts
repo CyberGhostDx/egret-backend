@@ -1,9 +1,9 @@
-import prisma from "@/shared/lib/prisma"
-import { AppError, ErrorCode } from "@/shared/lib/errors"
+import prisma from "@/shared/lib/prisma";
+import { AppError, ErrorCode } from "@/shared/lib/errors";
 
 export class CourseService {
   async getAllCourses() {
-    return prisma.course.findMany()
+    return prisma.course.findMany();
   }
 
   async getCourseById(id: string) {
@@ -11,22 +11,28 @@ export class CourseService {
       where: {
         id,
       },
-    })
+    });
     if (!course) {
-      throw new AppError(ErrorCode.COURSE_NOT_FOUND, "Course not found")
+      throw new AppError(ErrorCode.COURSE_NOT_FOUND, "Course not found");
     }
-    return course
+    return course;
   }
 
   async getAllCourseOfferings() {
     const courseOfferings = await prisma.course.findMany({
       include: {
-        offerings: true,
+        offerings: {
+          include: {
+            instructors: {
+              include: { instructor: true },
+            },
+          },
+        },
       },
-    })
+    });
 
-    return courseOfferings
+    return courseOfferings;
   }
 }
 
-export const courseService = new CourseService()
+export const courseService = new CourseService();

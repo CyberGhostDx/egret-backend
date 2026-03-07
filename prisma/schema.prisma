@@ -38,17 +38,16 @@ model Course {
 }
 
 model CourseOffering {
-  id           String  @id @default(cuid()) @db.VarChar(30)
-  courseId     String  @map("course_id") @db.VarChar(30)
-  section      String  @db.VarChar(32)
-  instructorTh String? @db.VarChar(255)
-  instructorEn String? @db.VarChar(255)
-  sectionType  String? @map("section_type") @db.VarChar(32)
-  credits      Decimal @default(3.0) @db.Decimal(4, 1)
+  id          String  @id @default(cuid()) @db.VarChar(30)
+  courseId    String  @map("course_id") @db.VarChar(30)
+  section     String  @db.VarChar(32)
+  sectionType String? @map("section_type") @db.VarChar(32)
+  credits     Decimal @default(3.0) @db.Decimal(4, 1)
 
-  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course                     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userCourses UserCourse[]
   exams       Exam[]
+  instructors CourseOfferingInstructor[]
 
   @@unique([courseId, section], map: "uq_offering_course_section")
   @@map("course_offerings")
@@ -67,6 +66,30 @@ model UserCourse {
   @@map("user_courses")
 }
 
+model Instructor {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  nameTh    String?  @map("name_th") @db.VarChar(255)
+  nameEn    String?  @map("name_en") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  offerings CourseOfferingInstructor[]
+
+  @@map("instructors")
+}
+
+model CourseOfferingInstructor {
+  offeringId   String @map("offering_id") @db.VarChar(30)
+  instructorId String @map("instructor_id") @db.VarChar(30)
+
+  offering   CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  instructor Instructor     @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@id([offeringId, instructorId])
+  @@index([instructorId], map: "idx_offering_instructor_instructor")
+  @@map("course_offering_instructors")
+}
+
 model Exam {
   id         String   @id @default(cuid()) @db.VarChar(30)
   offeringId String   @map("offering_id") @db.VarChar(30)
@@ -77,7 +100,6 @@ model Exam {
   building   String?  @db.VarChar(255)
   room       String?  @db.VarChar(255)
   note       String?  @db.Text
-  proctor    String?  @db.Text
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
   offering CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
