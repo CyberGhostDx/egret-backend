@@ -1,20 +1,21 @@
-import { z } from "zod"
-import { courseOfferingSchema } from "@/shared/schemas/schema"
+import { z } from "zod";
+import {
+  courseOfferingSchema,
+  offeringIdParamSchema,
+} from "@/shared/schemas/schema";
 
-export const enrollCourseSchema = z.object({
-  offeringId: z.string().min(1, "Offering ID is required"),
-})
+export const enrollCourseSchema = offeringIdParamSchema;
 
-export type EnrollCourseDto = z.infer<typeof enrollCourseSchema>
+export type EnrollCourseDto = z.infer<typeof enrollCourseSchema>;
 
 export const userCourseSchema = z.object({
   offering: courseOfferingSchema,
-})
+});
 
 export const userDashboardSchema = z.object({
   name: z.string().nullable(),
   email: z.string(),
   userCourses: z.array(userCourseSchema),
-})
+});
 
-export type UserDashboardResponse = z.infer<typeof userDashboardSchema>
+export type UserDashboardResponse = z.infer<typeof userDashboardSchema>;

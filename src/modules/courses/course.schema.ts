@@ -1,7 +1,7 @@
-import { z } from "zod"
+import { z } from "zod";
 
-export const getCourseByIdSchema = z.object({
-  id: z.string("Required Course Id"),
-})
+import { courseIdSchema } from "@/shared/schemas/schema";
 
-export type GetCourseByIdDto = z.infer<typeof getCourseByIdSchema>
+export const getCourseByIdSchema = courseIdSchema;
+
+export type GetCourseByIdDto = z.infer<typeof getCourseByIdSchema>;
