@@ -1,6 +1,7 @@
 import prisma from "../../shared/lib/prisma";
-import { Review } from "../reviews/review.model";
 import type { AdminDashboardResponse, CreateExamsInput } from "./admin.schema";
+import { AppError, ErrorCode } from "../../shared/lib/errors";
+import { Review } from "../reviews/review.model";
 
 export class AdminService {
   async getDashboardStats(): Promise<AdminDashboardResponse> {
@@ -101,8 +102,6 @@ export class AdminService {
         const startTime = new Date(1970, 0, 1, startHour, startMin);
         const endTime = new Date(1970, 0, 1, endHour, endMin);
 
-        // Parse date as local to avoid timezone shifting issues (especially with YYYY-MM-DD strings)
-        // If it's a simple YYYY-MM-DD, parse as local. Otherwise (ISO), use new Date().
         let examDate: Date;
         if (/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
           const [year, month, day] = item.date.split("-").map(Number);
@@ -130,6 +129,81 @@ export class AdminService {
 
       return { count: createdCount };
     });
+  }
+
+  async getAllReviews() {
+    const allReviews = await Review.find().sort({ createdAt: -1 }).lean();
+    if (!allReviews || allReviews.length === 0) return [];
+
+    const courseIds = [
+      ...new Set(allReviews.map((r: any) => r.courseId as string)),
+    ];
+
+    const [courses, averages] = await Promise.all([
+      prisma.course.findMany({
+        where: { id: { in: courseIds } },
+      }),
+      Review.aggregate([
+        {
+          $match: { courseId: { $in: courseIds }, status: { $ne: "deleted" } },
+        },
+        {
+          $group: {
+            _id: "$courseId",
+            averageDifficulty: { $avg: "$difficulty" },
+          },
+        },
+      ]),
+    ]);
+
+    const averageMap = averages.reduce(
+      (acc, curr) => {
+        acc[curr._id] = Math.round(curr.averageDifficulty);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const courseMap = new Map(courses.map((c) => [c.id, c]));
+
+    const reviewsByCourseMap = allReviews.reduce(
+      (acc, review: any) => {
+        const cid = review.courseId;
+        if (!acc[cid]) acc[cid] = [];
+        acc[cid].push({
+          ...review,
+          vote: review.vote ? review.vote.length : 0,
+        });
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
+
+    return courseIds.map((courseId) => {
+      const course = courseMap.get(courseId) || { id: courseId };
+      return {
+        ...course,
+        reviews: reviewsByCourseMap[courseId] || [],
+        difficulty: averageMap[courseId] || 0,
+      };
+    });
+  }
+
+  async softDeleteReviewByReviewId(reviewId: string) {
+    const updatedReview = await Review.findByIdAndUpdate(
+      reviewId,
+      { status: "deleted" },
+      { new: true },
+    );
+
+    if (!updatedReview) {
+      throw new AppError(
+        ErrorCode.REVIEW_NOT_FOUND,
+        `Review with ID ${reviewId} not found`,
+      );
+    }
+
+    return updatedReview;
   }
 }
 

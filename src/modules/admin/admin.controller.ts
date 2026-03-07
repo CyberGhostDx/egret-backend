@@ -1,6 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import { adminService } from "./admin.service";
-import { adminDashboardSchema, createExamsSchema } from "./admin.schema";
+import {
+  adminDashboardSchema,
+  createExamsSchema,
+  reviewIdParamSchema,
+} from "./admin.schema";
+import { CreateSuccessResponse } from "@/shared/lib/response";
 
 export class AdminController {
   async getDashboardInfo(
@@ -30,10 +35,7 @@ export class AdminController {
       const courseOfferings =
         await adminService.getAllCourseOfferingsWithExam();
 
-      res.json({
-        success: true,
-        data: courseOfferings,
-      });
+      res.json(CreateSuccessResponse(courseOfferings));
     } catch (error) {
       next(error);
     }
@@ -49,10 +51,37 @@ export class AdminController {
 
       const result = await adminService.createExams(validatedData);
 
-      res.status(201).json({
-        success: true,
-        data: result,
-      });
+      res.status(201).json(CreateSuccessResponse(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getAllReviews(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const reviews = await adminService.getAllReviews();
+      res.json(CreateSuccessResponse(reviews));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async softDeleteReviewByReviewId(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { reviewId } = reviewIdParamSchema.parse(req.params);
+
+      await adminService.softDeleteReviewByReviewId(reviewId);
+
+      res.json(
+        CreateSuccessResponse({ message: "Review deleted successfully" }),
+      );
     } catch (error) {
       next(error);
     }

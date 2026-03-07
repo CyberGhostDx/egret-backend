@@ -60,5 +60,10 @@ export const createExamItemSchema = z
 
 export const createExamsSchema = z.array(createExamItemSchema);
 
+export const reviewIdParamSchema = z.object({
+  reviewId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Review ID format"),
+});
+
 export type AdminDashboardResponse = z.infer<typeof adminDashboardSchema>;
 export type CreateExamsInput = z.infer<typeof createExamsSchema>;
+export type ReviewIdParam = z.infer<typeof reviewIdParamSchema>;

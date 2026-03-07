@@ -42,7 +42,11 @@ export const requireAdmin = async (
       headers: fromNodeHeaders(req.headers),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session) {
+      throw new AppError(ErrorCode.UNAUTH, "Unauthorized", 401);
+    }
+
+    if (session.user.role !== "admin") {
       throw new AppError(ErrorCode.FORBIDDEN, "Forbidden", 403);
     }
 
