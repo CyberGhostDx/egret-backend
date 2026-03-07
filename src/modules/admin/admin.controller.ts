@@ -86,6 +86,24 @@ export class AdminController {
       next(error);
     }
   }
+
+  async restoreReviewByReviewId(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { reviewId } = reviewIdParamSchema.parse(req.params);
+
+      await adminService.restoreReviewByReviewId(reviewId);
+
+      res.json(
+        CreateSuccessResponse({ message: "Review restored successfully" }),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const adminController = new AdminController();
