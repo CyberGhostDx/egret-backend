@@ -110,6 +110,18 @@ export class AdminService {
           examDate = new Date(item.date);
         }
 
+        const existingExam = await tx.exam.findFirst({
+          where: {
+            offeringId: offering.id,
+            examDate: examDate,
+            startTime: startTime,
+            endTime: endTime,
+            room: item.room || null,
+          },
+        });
+
+        if (existingExam) continue;
+
         await tx.exam.create({
           data: {
             offeringId: offering.id,
