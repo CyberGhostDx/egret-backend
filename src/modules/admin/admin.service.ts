@@ -193,7 +193,24 @@ export class AdminService {
     const updatedReview = await Review.findByIdAndUpdate(
       reviewId,
       { status: "deleted" },
-      { new: true },
+      { returnDocument: "after" },
+    );
+
+    if (!updatedReview) {
+      throw new AppError(
+        ErrorCode.REVIEW_NOT_FOUND,
+        `Review with ID ${reviewId} not found`,
+      );
+    }
+
+    return updatedReview;
+  }
+
+  async restoreReviewByReviewId(reviewId: string) {
+    const updatedReview = await Review.findByIdAndUpdate(
+      reviewId,
+      { status: "published" },
+      { returnDocument: "after" },
     );
 
     if (!updatedReview) {
