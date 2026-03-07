@@ -44,6 +44,9 @@ export class UserService {
             offering: {
               include: {
                 course: true,
+                instructors: {
+                  include: { instructor: true },
+                },
                 exams: {
                   omit: { offeringId: true },
                   orderBy: {

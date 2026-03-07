@@ -55,6 +55,11 @@ export class AdminService {
     return await prisma.courseOffering.findMany({
       include: {
         course: true,
+        instructors: {
+          include: {
+            instructor: true,
+          },
+        },
         exams: {
           omit: {
             offeringId: true,
@@ -89,16 +94,76 @@ export class AdminService {
               section: item.section,
             },
           },
-          update: {},
+          update: {
+            sectionType: item.sectionType,
+            credits: item.credits,
+          },
           create: {
             courseId: item.courseId,
             section: item.section,
-            instructorTh: item.instructorTh,
-            instructorEn: item.instructorEn,
             sectionType: item.sectionType,
             credits: item.credits,
           },
         });
+
+        const rawInstructorsTh = item.instructorTh
+          ? item.instructorTh.split(",")
+          : [];
+        const rawInstructorsEn = item.instructorEn
+          ? item.instructorEn.split(",")
+          : [];
+
+        const parseInstructors = (names: string[]) => {
+          return names
+            .map((n) =>
+              n
+                .replace(/\s*\(?(?:master|ผู้กรอกเกรด)\)?\s*/gi, "")
+                .replace(/^\(\)$/, "")
+                .trim(),
+            )
+            .filter((n) => n.length > 0 && n !== "()");
+        };
+
+        const instructorsTh = parseInstructors(rawInstructorsTh);
+        const instructorsEn = parseInstructors(rawInstructorsEn);
+
+        const maxLen = Math.max(instructorsTh.length, instructorsEn.length);
+        for (let i = 0; i < maxLen; i++) {
+          const nameTh = instructorsTh[i] || "";
+          const nameEn = instructorsEn[i] || "";
+
+          if (!nameTh && !nameEn) continue;
+
+          let instructor = await tx.instructor.findFirst({
+            where: {
+              ...(nameTh ? { nameTh } : {}),
+              ...(nameEn ? { nameEn } : {}),
+            },
+          });
+
+          if (!instructor) {
+            instructor = await tx.instructor.create({
+              data: {
+                nameTh: nameTh || null,
+                nameEn: nameEn || null,
+              },
+            });
+          }
+
+          await tx.courseOfferingInstructor.upsert({
+            where: {
+              offeringId_instructorId: {
+                offeringId: offering.id,
+                instructorId: instructor.id,
+              },
+            },
+            update: {},
+            create: {
+              offeringId: offering.id,
+              instructorId: instructor.id,
+            },
+          });
+        }
 
         const [startHour, startMin] = item.startTime.split(":").map(Number);
         const [endHour, endMin] = item.endTime.split(":").map(Number);
@@ -135,7 +200,6 @@ export class AdminService {
             endTime,
             building: item.building,
             room: item.room,
-            proctor: item.proctor,
             note: item.note,
           },
         });
@@ -259,12 +323,66 @@ export class AdminService {
         data: {
           courseId: data.courseId,
           section: data.section,
-          instructorTh: data.instructorTh,
-          instructorEn: data.instructorEn,
           sectionType: data.sectionType,
           credits: data.credits,
         },
       });
+
+      await tx.courseOfferingInstructor.deleteMany({
+        where: { offeringId: data.id },
+      });
+
+      const rawInstructorsTh = data.instructorTh
+        ? data.instructorTh.split(",")
+        : [];
+      const rawInstructorsEn = data.instructorEn
+        ? data.instructorEn.split(",")
+        : [];
+
+      const parseInstructors = (names: string[]) => {
+        return names
+          .map((n) =>
+            n
+              .replace(/\s*\(?(?:master|ผู้กรอกเกรด)\)?\s*/gi, "")
+              .replace(/^\(\)$/, "")
+              .trim(),
+          )
+          .filter((n) => n.length > 0 && n !== "()");
+      };
+
+      const instructorsTh = parseInstructors(rawInstructorsTh);
+      const instructorsEn = parseInstructors(rawInstructorsEn);
+
+      const maxLen = Math.max(instructorsTh.length, instructorsEn.length);
+      for (let i = 0; i < maxLen; i++) {
+        const nameTh = instructorsTh[i] || "";
+        const nameEn = instructorsEn[i] || "";
+
+        if (!nameTh && !nameEn) continue;
+
+        let instructor = await tx.instructor.findFirst({
+          where: {
+            ...(nameTh ? { nameTh } : {}),
+            ...(nameEn ? { nameEn } : {}),
+          },
+        });
+
+        if (!instructor) {
+          instructor = await tx.instructor.create({
+            data: {
+              nameTh: nameTh || null,
+              nameEn: nameEn || null,
+            },
+          });
+        }
+
+        await tx.courseOfferingInstructor.create({
+          data: {
+            offeringId: offering.id,
+            instructorId: instructor.id,
+          },
+        });
+      }
 
       const [startHour, startMin] = data.startTime.split(":").map(Number);
       const [endHour, endMin] = data.endTime.split(":").map(Number);
@@ -288,7 +406,6 @@ export class AdminService {
           endTime,
           building: data.building,
           room: data.room,
-          proctor: data.proctor,
           note: data.note,
         },
       });

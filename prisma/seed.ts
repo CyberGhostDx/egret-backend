@@ -58,20 +58,75 @@ async function main() {
         },
       },
       update: {
-        instructorTh: record["Instructor_th"],
-        instructorEn: record["Instructor_en"],
         sectionType: record["Section_Type_en"],
         credits: parseFloat(record["Credits"]) || 0,
       },
       create: {
         courseId: courseId,
         section: section,
-        instructorTh: record["Instructor_th"],
-        instructorEn: record["Instructor_en"],
         sectionType: record["Section_Type_en"],
         credits: parseFloat(record["Credits"]) || 0,
       },
     });
+
+    const rawInstructorsTh = record["Instructor_th"]
+      ? record["Instructor_th"].split(",")
+      : [];
+    const rawInstructorsEn = record["Instructor_en"]
+      ? record["Instructor_en"].split(",")
+      : [];
+
+    const parseInstructors = (names: string[]) => {
+      return names
+        .map((n) =>
+          n
+            .replace(/\s*\(?(?:master|ผู้กรอกเกรด)\)?\s*/gi, "")
+            .replace(/^\(\)$/, "")
+            .trim(),
+        )
+        .filter((n) => n.length > 0 && n !== "()");
+    };
+
+    const instructorsTh = parseInstructors(rawInstructorsTh);
+    const instructorsEn = parseInstructors(rawInstructorsEn);
+
+    const maxLen = Math.max(instructorsTh.length, instructorsEn.length);
+    for (let i = 0; i < maxLen; i++) {
+      const nameTh = instructorsTh[i] || "";
+      const nameEn = instructorsEn[i] || "";
+
+      if (!nameTh && !nameEn) continue;
+
+      let instructor = await prisma.instructor.findFirst({
+        where: {
+          ...(nameTh ? { nameTh } : {}),
+          ...(nameEn ? { nameEn } : {}),
+        },
+      });
+
+      if (!instructor) {
+        instructor = await prisma.instructor.create({
+          data: {
+            nameTh: nameTh || null,
+            nameEn: nameEn || null,
+          },
+        });
+      }
+
+      await prisma.courseOfferingInstructor.upsert({
+        where: {
+          offeringId_instructorId: {
+            offeringId: offering.id,
+            instructorId: instructor.id,
+          },
+        },
+        update: {},
+        create: {
+          offeringId: offering.id,
+          instructorId: instructor.id,
+        },
+      });
+    }
 
     const dateStr = record["Date"];
     const startTimeStr = record["Start Time"].padStart(5, "0");
@@ -100,7 +155,6 @@ async function main() {
         building: record["Building"],
         room: record["Room"],
         note: record["Note"],
-        proctor: record["Proctor"],
       },
     });
 
