@@ -17,6 +17,14 @@ export const requireAuth = async (
       throw new AppError(ErrorCode.UNAUTH, "Unauthorized", 401);
     }
 
+    if (session.user.banned) {
+      throw new AppError(
+        ErrorCode.FORBIDDEN,
+        "Your account has been banned",
+        403,
+      );
+    }
+
     req.auth = session;
     next();
   } catch (error) {
@@ -36,6 +44,14 @@ export const requireAdmin = async (
 
     if (!session || session.user.role !== "admin") {
       throw new AppError(ErrorCode.FORBIDDEN, "Forbidden", 403);
+    }
+
+    if (session.user.banned) {
+      throw new AppError(
+        ErrorCode.FORBIDDEN,
+        "Your account has been banned",
+        403,
+      );
     }
 
     req.auth = session;
