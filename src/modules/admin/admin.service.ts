@@ -1,5 +1,9 @@
 import prisma from "../../shared/lib/prisma";
-import type { AdminDashboardResponse, CreateExamsInput } from "./admin.schema";
+import type {
+  AdminDashboardResponse,
+  CreateExamsInput,
+  UpdateCourseOfferingExamInput,
+} from "./admin.schema";
 import { AppError, ErrorCode } from "../../shared/lib/errors";
 import { Review } from "../reviews/review.model";
 
@@ -233,6 +237,76 @@ export class AdminService {
     }
 
     return updatedReview;
+  }
+
+  async updateExam(data: UpdateCourseOfferingExamInput) {
+    return await prisma.$transaction(async (tx) => {
+      await tx.course.upsert({
+        where: { id: data.courseId },
+        update: {
+          titleTh: data.subjectTh,
+          titleEn: data.subjectEn,
+        },
+        create: {
+          id: data.courseId,
+          titleTh: data.subjectTh,
+          titleEn: data.subjectEn,
+        },
+      });
+
+      const offering = await tx.courseOffering.update({
+        where: { id: data.id },
+        data: {
+          courseId: data.courseId,
+          section: data.section,
+          instructorTh: data.instructorTh,
+          instructorEn: data.instructorEn,
+          sectionType: data.sectionType,
+          credits: data.credits,
+        },
+      });
+
+      const [startHour, startMin] = data.startTime.split(":").map(Number);
+      const [endHour, endMin] = data.endTime.split(":").map(Number);
+
+      const startTime = new Date(1970, 0, 1, startHour, startMin);
+      const endTime = new Date(1970, 0, 1, endHour, endMin);
+
+      let examDate: Date;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+        const [year, month, day] = data.date.split("-").map(Number);
+        examDate = new Date(year!, month! - 1, day!);
+      } else {
+        examDate = new Date(data.date);
+      }
+
+      const exam = await tx.exam.update({
+        where: { id: data.examId },
+        data: {
+          examDate,
+          startTime,
+          endTime,
+          building: data.building,
+          room: data.room,
+          proctor: data.proctor,
+          note: data.note,
+        },
+      });
+
+      return { offering, exam };
+    });
+  }
+
+  async deleteExamById(examId: string) {
+    return await prisma.exam.delete({
+      where: { id: examId },
+    });
+  }
+
+  async deleteOfferingById(offeringId: string) {
+    return await prisma.courseOffering.delete({
+      where: { id: offeringId },
+    });
   }
 }
 
