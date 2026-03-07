@@ -1,6 +1,7 @@
 import { betterAuth, APIError } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { customSession } from "better-auth/plugins";
+import { admin } from "better-auth/plugins/admin";
 import prisma from "./prisma";
 import { env } from "../../config/env";
 import { logger } from "./logger";
@@ -56,6 +57,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    admin(),
     customSession(async ({ user, session }) => {
       return {
         user: {
@@ -64,6 +66,7 @@ export const auth = betterAuth({
           email: user.email,
           image: user.image,
           role: (user as typeof user & { role: string }).role,
+          banned: (user as any).banned,
         },
         session: {
           id: session.id,
