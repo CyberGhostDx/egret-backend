@@ -6,6 +6,14 @@
 
 This is the backend system for the EGRET project, built with **Bun**, **Express.js**, **Prisma (MySQL)**, and **MongoDB**, utilizing **Better Auth** for comprehensive authentication management.
 
+## 🛠️ Tech Stack
+
+- **Core:** Bun + Express
+- **Database & ORM:** Prisma (MySQL), Mongoose (MongoDB)
+- **Authentication:** Better Auth
+- **Validation:** Zod
+- **Logging:** Pino
+
 ## 📋 Prerequisites
 
 - [Bun](https://bun.sh/) (Version >= 1.3.0)
@@ -74,13 +82,93 @@ This repository includes a `docker-compose.yml` to spin up the entire backend st
    docker exec -it egret-backend bun run prisma/seed-admin.ts
    ```
 
-## 🛠️ Tech Stack
+## 📁 Folder Structure
 
-- **Core:** Bun + Express
-- **Database & ORM:** Prisma (MySQL), Mongoose (MongoDB)
-- **Authentication:** Better Auth
-- **Validation:** Zod
-- **Logging:** Pino
+```text
+src/
+├── app.ts              # Express application configuration
+├── server.ts           # Server entry point
+├── routes.ts           # Main router
+├── config/             # Configuration files (env, cors)
+├── modules/            # Modular architecture
+│   ├── admin/          # Admin-related logic
+│   ├── courses/        # Course and offering logic
+│   ├── reviews/        # Review system (MongoDB)
+│   └── users/          # User profile and enrollments
+├── shared/             # Shared utilities and middlewares
+│   ├── lib/            # Shared libraries (prisma, mongoose, logger)
+│   ├── middleware/     # Shared express middlewares (auth, error-handler)
+│   └── schemas/        # Shared Zod schemas
+└── types.d.ts          # Global type definitions
+```
+
+```text
+src/
+├── app.ts              # Express application configuration
+├── server.ts           # Server entry point
+├── routes.ts           # Main router
+├── config/             # Configuration files (env, cors)
+├── modules/            # Modular architecture
+│   ├── admin/          # Admin-related logic
+│   ├── courses/        # Course and offering logic
+│   ├── reviews/        # Review system (MongoDB)
+│   └── users/          # User profile and enrollments
+├── shared/             # Shared utilities and middlewares
+│   ├── lib/            # Shared libraries (prisma, mongoose, logger)
+│   ├── middleware/     # Shared express middlewares (auth, error-handler)
+│   └── schemas/        # Shared Zod schemas
+└── types.d.ts          # Global type definitions
+```
+
+## API Documentation
+
+All API endpoints are prefixed with `/api`. Authentication is required for most endpoints (handled via cookies).
+
+### Authentication
+
+Authentication is managed by **Better Auth**.
+
+| Method | Endpoint  | Description                                     |
+| :----- | :-------- | :---------------------------------------------- |
+| ANY    | `/auth/*` | Handles login, logout, session management, etc. |
+
+### Users (`/api/users`)
+
+| Method   | Endpoint              | Description                          | Notes / Body                 |
+| :------- | :-------------------- | :----------------------------------- | :--------------------------- |
+| `GET`    | `/me`                 | Get current user profile & dashboard | Includes enrolled courses    |
+| `POST`   | `/enroll`             | Enroll in a course offering          | `{ "offeringId": "string" }` |
+| `DELETE` | `/enroll/:offeringId` | Unenroll from a course offering      |                              |
+
+### Courses (`/api/courses`)
+
+| Method | Endpoint     | Description                 | Notes                                       |
+| :----- | :----------- | :-------------------------- | :------------------------------------------ |
+| `GET`  | `/offerings` | List all course offerings   | Includes instructors, exams, and difficulty |
+| `GET`  | `/:id`       | Get specific course details | Search by course code                       |
+
+### Reviews (`/api/reviews`)
+
+| Method | Endpoint     | Description              | Notes / Body                                                         |
+| :----- | :----------- | :----------------------- | :------------------------------------------------------------------- |
+| `GET`  | `/:courseId` | Get reviews for a course |                                                                      |
+| `POST` | `/:courseId` | Post a new review        | `{ "difficulty": 1-5, "content": "string", "isAnonymous": boolean }` |
+
+### Admin (`/api/admin`)
+
+_Requires Admin role_
+
+| Method   | Endpoint                     | Description                                 |
+| :------- | :--------------------------- | :------------------------------------------ |
+| `GET`    | `/dashboard`                 | Admin dashboard statistics                  |
+| `GET`    | `/courses/offerings`         | View all offerings with detailed exam info  |
+| `GET`    | `/reviews`                   | Manage all reviews across all courses       |
+| `DELETE` | `/reviews/:reviewId`         | Soft delete a review                        |
+| `PATCH`  | `/reviews/:reviewId/restore` | Restore a deleted review                    |
+| `POST`   | `/exam`                      | Bulk upload/create exams from CSV-like data |
+| `PATCH`  | `/exams`                     | Update existing exam details                |
+| `DELETE` | `/exams/:examId`             | Delete a specific exam                      |
+| `DELETE` | `/offerings/:offeringId`     | Delete a course offering                    |
 
 ## 🔗 Frontend
 
