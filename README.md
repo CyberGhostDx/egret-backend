@@ -85,3 +85,7 @@ This repository includes a `docker-compose.yml` to spin up the entire backend st
 ## 🔗 Frontend
 
 [EGRET-Frontend](https://github.com/cyberghostdx/egret)
+
+## Database Design
+
+[PDF](https://github.com/CyberGhostDx/egret-backend/blob/develop/docs/EGRET%20Database%20Design.pdf)
