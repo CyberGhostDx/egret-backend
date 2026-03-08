@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://lh3.googleusercontent.com/d/1vRrDe-028hDsVOTA6Ul6zMQhOaG5oXVB" alt="egret" width="200" height="200">
+</p>
+
 # EGRET Backend
 
 This is the backend system for the EGRET project, built with **Bun**, **Express.js**, **Prisma (MySQL)**, and **MongoDB**, utilizing **Better Auth** for comprehensive authentication management.
