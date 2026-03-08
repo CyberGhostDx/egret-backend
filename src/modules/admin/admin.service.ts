@@ -168,8 +168,9 @@ export class AdminService {
         const [startHour, startMin] = item.startTime.split(":").map(Number);
         const [endHour, endMin] = item.endTime.split(":").map(Number);
 
-        const startTime = new Date(1970, 0, 1, startHour, startMin);
-        const endTime = new Date(1970, 0, 1, endHour, endMin);
+        // Create time based on UTC explicitly to avoid local server timezone interference
+        const startTime = new Date(Date.UTC(1970, 0, 1, startHour, startMin));
+        const endTime = new Date(Date.UTC(1970, 0, 1, endHour, endMin));
 
         let examDate: Date;
         if (/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
@@ -387,8 +388,8 @@ export class AdminService {
       const [startHour, startMin] = data.startTime.split(":").map(Number);
       const [endHour, endMin] = data.endTime.split(":").map(Number);
 
-      const startTime = new Date(1970, 0, 1, startHour, startMin);
-      const endTime = new Date(1970, 0, 1, endHour, endMin);
+      const startTime = new Date(Date.UTC(1970, 0, 1, startHour, startMin));
+      const endTime = new Date(Date.UTC(1970, 0, 1, endHour, endMin));
 
       let examDate: Date;
       if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
