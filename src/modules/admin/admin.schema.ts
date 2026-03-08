@@ -36,23 +36,6 @@ export const createExamItemSchema = z
   })
   .refine(
     (data) => {
-      const startParts = data.startTime.split(":");
-      const endParts = data.endTime.split(":");
-      const startHour = parseInt(startParts[0]!, 10);
-      const startMin = parseInt(startParts[1]!, 10);
-      const endHour = parseInt(endParts[0]!, 10);
-      const endMin = parseInt(endParts[1]!, 10);
-      const start = startHour * 60 + startMin;
-      const end = endHour * 60 + endMin;
-      return start < end;
-    },
-    {
-      message: "startTime must be before endTime",
-      path: ["startTime"],
-    },
-  )
-  .refine(
-    (data) => {
       const date = new Date(data.date);
       return !isNaN(date.getTime());
     },
