@@ -1,0 +1,53 @@
+name: EGRET Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:9.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: egret_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Check Formatting
+        run: bunx prettier --check .
+
+      - name: Run Prisma Generate
+        run: bunx prisma generate
+
+      - name: Run Migrations (Test DB)
+        run: bunx prisma migrate dev
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+
+      - name: Type Check
+        run: bunx tsc --noEmit
+
+      - name: Run Tests
+        run: bun test
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          BETTER_AUTH_SECRET: test-secret-key-12345678901234567890
+          FRONTEND_URL: http://localhost:3000
