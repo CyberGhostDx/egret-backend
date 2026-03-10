@@ -8,15 +8,18 @@
     "start": "bun src",
     "generate": "bunx --bun prisma generate",
     "migrate": "bunx --bun prisma migrate dev",
-    "db:seed": "bunx --bun prisma db seed"
+    "db:seed": "bunx --bun prisma db seed",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/supertest": "^7.2.0",
     "prettier": "^3.8.1",
-    "prisma": "^7.4.1"
+    "prisma": "^7.4.1",
+    "supertest": "^7.2.2"
   },
   "peerDependencies": {
     "typescript": "^5"
