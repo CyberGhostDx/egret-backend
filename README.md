@@ -4,6 +4,9 @@
 
 # EGRET Backend
 
+[![EGRET Backend CI](https://github.com/cyberghostdx/egret-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberghostdx/egret-backend/actions/workflows/ci.yml)
+[![EGRET Backend Release](https://github.com/cyberghostdx/egret-backend/actions/workflows/release.yml/badge.svg)](https://github.com/cyberghostdx/egret-backend/actions/workflows/release.yml)
+
 This is the backend system for the EGRET project, built with **Bun**, **Express.js**, **Prisma (MySQL)**, and **MongoDB**, utilizing **Better Auth** for comprehensive authentication management.
 
 ## 🛠️ Tech Stack
