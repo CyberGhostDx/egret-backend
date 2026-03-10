@@ -77,30 +77,12 @@ This repository includes a `docker-compose.yml` to spin up the entire backend st
    Even inside Docker, you need to run migrations for the first time:
 
    ```bash
-   docker exec -it egret-backend bun run migrate
-   docker exec -it egret-backend bun run db:seed
-   docker exec -it egret-backend bun run prisma/seed-admin.ts
+   docker exec -it egret_backend bun run migrate
+   docker exec -it egret_backend bun run db:seed
+   docker exec -it egret_backend bun run prisma/seed-admin.ts
    ```
 
 ## 📁 Folder Structure
-
-```text
-src/
-├── app.ts              # Express application configuration
-├── server.ts           # Server entry point
-├── routes.ts           # Main router
-├── config/             # Configuration files (env, cors)
-├── modules/            # Modular architecture
-│   ├── admin/          # Admin-related logic
-│   ├── courses/        # Course and offering logic
-│   ├── reviews/        # Review system (MongoDB)
-│   └── users/          # User profile and enrollments
-├── shared/             # Shared utilities and middlewares
-│   ├── lib/            # Shared libraries (prisma, mongoose, logger)
-│   ├── middleware/     # Shared express middlewares (auth, error-handler)
-│   └── schemas/        # Shared Zod schemas
-└── types.d.ts          # Global type definitions
-```
 
 ```text
 src/
