@@ -33,11 +33,13 @@ jobs:
 
       - name: Run Prisma Generate
         run: bunx prisma generate
+        env:
+          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
 
       - name: Run Migrations (Test DB)
         run: bunx prisma migrate dev
         env:
-          DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
 
       - name: Type Check
         run: bunx tsc --noEmit
@@ -45,6 +47,6 @@ jobs:
       - name: Run Tests
         run: bun test
         env:
-          DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
           BETTER_AUTH_SECRET: test-secret-key-12345678901234567890
           FRONTEND_URL: http://localhost:3000
