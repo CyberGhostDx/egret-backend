@@ -13,11 +13,11 @@ const envSchema = z.object({
   MYSQL_PASSWORD: z.string(),
   MYSQL_DATABASE: z.string(),
 
+  MONGODB_URL: z.url(),
   FRONTEND_URL: z.url(),
 
-  ACCESS_TOKEN_SECRET: z.string().min(32),
-  BETTER_AUTH_SECRET: z.string().optional(),
-  BETTER_AUTH_URL: z.url().optional(),
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.url(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   ADMIN_EMAIL: z.email().default("admin@egret.app"),

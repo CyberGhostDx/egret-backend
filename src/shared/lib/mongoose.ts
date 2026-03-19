@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import { env } from "@/shared/lib/env"
+import { env } from "@/config/env"
 
 import { logger } from "./logger"
 

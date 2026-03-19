@@ -12,6 +12,19 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: egret_test
+      MONGODB_URL: mongodb://localhost:27017/egret_test
+      FRONTEND_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: test-secret-key-access-token-12345678901234567890
+      BETTER_AUTH_URL: http://localhost:8000/api/auth
+
     services:
       mysql:
         image: mysql:9.0
@@ -49,26 +62,12 @@ jobs:
 
       - name: Run Prisma Generate
         run: bunx prisma generate
-        env:
-          NODE_ENV: test
-          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
-          MONGODB_URL: mongodb://localhost:27017/egret_test
 
       - name: Run Migrations (Test DB)
-        run: bunx prisma migrate dev --name init
-        env:
-          NODE_ENV: test
-          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
-          MONGODB_URL: mongodb://localhost:27017/egret_test
+        run: bunx prisma migrate deploy
 
       - name: Type Check
         run: bunx tsc --noEmit
 
       - name: Run Tests
         run: bun test
-        env:
-          NODE_ENV: test
-          MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
-          MONGODB_URL: mongodb://localhost:27017/egret_test
-          BETTER_AUTH_SECRET: test-secret-key-12345678901234567890
-          FRONTEND_URL: http://localhost:3000
