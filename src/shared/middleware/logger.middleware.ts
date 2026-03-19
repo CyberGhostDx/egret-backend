@@ -19,7 +19,7 @@ export const requestLogger = pinoHttp({
       ip:
         req.headers["cf-connecting-ip"] ||
         req.headers["x-forwarded-for"] ||
-        req.ips[0] ||
+        req.ips?.[0] ||
         req.ip ||
         req.socket?.remoteAddress,
     }),
