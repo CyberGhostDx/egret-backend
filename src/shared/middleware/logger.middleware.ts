@@ -4,7 +4,8 @@ import { logger } from "../lib/logger";
 export const requestLogger = pinoHttp({
   logger,
   autoLogging: {
-    ignore: (req) => req.url === "/api/health",
+    ignore: (req) =>
+      req.url === "/api/health" || req.url === "/api/auth/get-session",
   },
   customLogLevel: (req, res, err) => {
     if (res.statusCode >= 500 || err) return "error";
@@ -15,7 +16,12 @@ export const requestLogger = pinoHttp({
     req: (req) => ({
       method: req.method,
       url: req.url,
-      ip: req.headers["x-forwarded-for"] || req.socket?.remoteAddress || req.ip,
+      ip:
+        req.headers["cf-connecting-ip"] ||
+        req.headers["x-forwarded-for"] ||
+        req.ips[0] ||
+        req.ip ||
+        req.socket?.remoteAddress,
     }),
     res: (res) => ({
       statusCode: res.statusCode,

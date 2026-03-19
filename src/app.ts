@@ -11,6 +11,7 @@ import { requestLogger } from "./shared/middleware/logger.middleware";
 
 const app = express();
 
+app.set("trust proxy", true);
 app.use(requestLogger);
 app.use(cors(corsOptions));
 app.use(express.json());
