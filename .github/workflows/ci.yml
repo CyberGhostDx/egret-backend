@@ -2,7 +2,7 @@ name: EGRET Backend CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main, develop]
 
@@ -21,6 +21,11 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
 
     steps:
       - name: Checkout Code
@@ -45,12 +50,16 @@ jobs:
       - name: Run Prisma Generate
         run: bunx prisma generate
         env:
+          NODE_ENV: test
           MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          MONGODB_URL: mongodb://localhost:27017/egret_test
 
       - name: Run Migrations (Test DB)
-        run: bunx prisma migrate dev
+        run: bunx prisma migrate dev --name init
         env:
+          NODE_ENV: test
           MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          MONGODB_URL: mongodb://localhost:27017/egret_test
 
       - name: Type Check
         run: bunx tsc --noEmit
@@ -58,6 +67,8 @@ jobs:
       - name: Run Tests
         run: bun test
         env:
+          NODE_ENV: test
           MYSQL_DATABASE_URL: mysql://root:root@127.0.0.1:3306/egret_test
+          MONGODB_URL: mongodb://localhost:27017/egret_test
           BETTER_AUTH_SECRET: test-secret-key-12345678901234567890
           FRONTEND_URL: http://localhost:3000
