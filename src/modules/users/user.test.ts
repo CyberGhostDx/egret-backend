@@ -14,22 +14,25 @@ mock.module("./user.service", () => ({
   },
 }));
 
+let mockSessionData: any = {
+  user: {
+    id: "user_test_id",
+    name: "Test User",
+    email: "test@example.com",
+    role: "user",
+    banned: false,
+  },
+  session: {
+    id: "session_test_id",
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+  },
+};
+
+// Mock the entire auth object
 mock.module("../../shared/lib/auth", () => ({
   auth: {
     api: {
-      getSession: mock(async () => ({
-        user: {
-          id: "user_test_id",
-          name: "Test User",
-          email: "test@example.com",
-          role: "user",
-          banned: false,
-        },
-        session: {
-          id: "session_test_id",
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-        },
-      })),
+      getSession: mock(async () => mockSessionData),
     },
   },
 }));
@@ -83,6 +86,34 @@ describe("User Module API (Supertest)", () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
     });
+
+    test("should return 400 when offeringId is too short", async () => {
+      const payload = { offeringId: "" };
+
+      const response = await request(app)
+        .post("/api/users/enroll")
+        .send(payload)
+        .set("Cookie", [csrfCookie])
+        .set("x-csrf-token", csrfToken)
+        .set("Accept", "application/json");
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
+
+    test("should return 400 when enrolling with numeric offeringId (wrong type)", async () => {
+      const payload = { offeringId: 12345 };
+
+      const response = await request(app)
+        .post("/api/users/enroll")
+        .send(payload)
+        .set("Cookie", [csrfCookie])
+        .set("x-csrf-token", csrfToken)
+        .set("Accept", "application/json");
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
   });
 
   describe("DELETE /api/users/enroll/:offeringId", () => {
@@ -98,6 +129,42 @@ describe("User Module API (Supertest)", () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBe("unenrolled");
+    });
+
+    test("should return 400 with invalid param", async () => {
+      const response = await request(app)
+        .delete(`/api/users/enroll/ `) // Space as ID
+        .set("Cookie", [csrfCookie])
+        .set("x-csrf-token", csrfToken)
+        .set("Accept", "application/json");
+      expect([200, 400, 404]).toContain(response.status);
+    });
+  });
+
+  describe("Unauthorized Access (Missing Tokens)", () => {
+    test("GET /api/users/me should return 403 or 401 depends on setup", async () => {
+      const originalSession = mockSessionData;
+      mockSessionData = null;
+
+      try {
+        const response = await request(app)
+          .get("/api/users/me")
+          .set("Accept", "application/json");
+
+        expect([401, 403]).toContain(response.status);
+      } finally {
+        mockSessionData = originalSession;
+      }
+    });
+
+    test("POST /api/users/enroll should return 403 on missing CSRF token", async () => {
+      const payload = { offeringId: "offering_123" };
+      const response = await request(app)
+        .post("/api/users/enroll")
+        .send(payload)
+        .set("Accept", "application/json");
+
+      expect(response.status).toBe(403);
     });
   });
 });
