@@ -6,7 +6,12 @@ import { logger } from "./logger"
 const connectMongoDB = async () => {
   try {
     if (mongoose.connection.readyState >= 1) return
-    await mongoose.connect(env.MONGODB_URL)
+    await mongoose.connect(env.MONGODB_URL, {
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 5000,
+    })
   } catch (error) {
     logger.error(error, "MongoDB connection error")
   }
