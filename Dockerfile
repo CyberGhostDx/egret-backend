@@ -1,12 +1,12 @@
-# Stage 1: Build
-FROM oven/bun:1.3-alpine AS builder
-
-# Install openssl for Prisma generation
-RUN apk add --no-cache openssl
+# Stage 1: Build & Install dependencies
+FROM oven/bun:1.3-slim AS builder
 
 WORKDIR /app
 
-# Copy package files and install ALL dependencies
+# Install openssl for Prisma generation
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# Copy package files and install all dependencies (including devDependencies)
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
@@ -16,13 +16,17 @@ COPY . .
 # Generate Prisma client
 RUN MYSQL_DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" bun run generate
 
-# Stage 2: Production
-FROM oven/bun:1.3-alpine
+# Prune devDependencies to keep the production node_modules minimal
+RUN rm -rf node_modules && bun install --frozen-lockfile --production
 
-# Install production-only system dependencies
-RUN apk add --no-cache curl openssl
+
+# Stage 2: Production Release
+FROM oven/bun:1.3-slim
 
 WORKDIR /app
+
+# Install production-only system dependencies
+RUN apt-get update && apt-get install -y curl openssl && rm -rf /var/lib/apt/lists/*
 
 # Set production environment
 ENV NODE_ENV=production

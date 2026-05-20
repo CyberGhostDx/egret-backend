@@ -20,6 +20,6 @@ const prisma =
   new PrismaClient({
     adapter,
   });
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+globalForPrisma.prisma = prisma;
 
 export default prisma;
